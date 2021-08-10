@@ -3,7 +3,7 @@ title: "Notes"
 output: "pdf_document"
 ---
 # Notes
-#RBAC
+RBAC
 : Role-Based Access Control
 
 * Follow principal of least privelege
