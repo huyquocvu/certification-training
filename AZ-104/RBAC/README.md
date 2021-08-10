@@ -18,7 +18,7 @@ graph TD;
 A(Subscription)-->B(Resource Group);
 B-->C(Single Resource);
 ```
-
+---
 ## Security Principals
 User
 : Individual who has a profile in Azure AD. Can be assigned to users in other tenants
@@ -31,7 +31,7 @@ Service Principal
 
 Managed Identity
 : Identity in Azure AD that is automatically managed by Azure. Ex: Azure Key Vault, VMs
-
+---
 ## General Roles
 Contributer
 : can create/manage all resources. CANNOT grant access
@@ -47,7 +47,7 @@ User Access Administrator
 
 ### Deny Assignments
 - Block users from performing actions
-
+---
 ## Useful commands
 
 ```PowerShell
@@ -78,7 +78,7 @@ New-AZRoleDefinition
 # Then, modify its properties as required. 
 # Finally, use this command to create a custom role using role definition.
 ```
-
+---
 ## Custom Role
 Required properties
 | Property | Type | Description |
@@ -120,8 +120,8 @@ $role.AssignableScopes.Add("/subscriptions/0000-1111-2222-aaaa-123456778")
 
 # Add the custom role
 New-AZRoleDefinition -Role $role
-
 ```
+---
 # Links
 
 [What is Azure RBAC](https://docs.microsoft.com/en-us/azure/role-based-access-control/overview)
