@@ -14,8 +14,9 @@
 # Need To Knows
 
 <div class=important-boxed>
-This means important. Pay close attention
+This means important. Pay close attention as it may be on the exam.
 </div>
+
 ## Exam Breakdown {#exam-breakdown}
 **Manage Azure identities and governance (15-20%)**
 - ### [Manage AD objects](#manage-ad-objects)
@@ -115,16 +116,14 @@ New-AzureADUser -DisplayName "Huy Vu" -PasswordProfile $PasswordProfile `
     - User administrator
 
 #### Configure Azure AD Join {#configure-azure-ad-join}
+
 | Azure AD Registered | Azure AD Joined |
 | -- | -- |
 | Personally onwed device | Organization owned device |
 | MSA or local account sign-in | Azure AD sign-in |
-| Windows 10 | Windows 10 |
-| iOS | Windows Server 2019 VMs in Azure |
-| Android | |
-| macOS | |
- 
- #### Configure Self-Service Password Reset {#configure-self-service-password-reset}
+| Windows 10<br>iOS<br>Android<br>macOS | Windows 10<br>Windows Server 2019 VMs in Azure |
+
+#### Configure Self-Service Password Reset {#configure-self-service-password-reset}
  |  | Azure AD Free | Azure AD Premium P1 or P2 |
  | -- | -- | -- |
  | Cloud-only password change | :heavy_check_mark: | :heavy_check_mark: |
@@ -461,3 +460,4 @@ az group create --name example-rg --location eastus2
 *More information at https://bit.ly/2DHOGXa*
 
 </div>
+
