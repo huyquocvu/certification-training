@@ -1,4 +1,16 @@
-?
+<style>
+    .important-boxed {
+        background: #D9E5D6;
+        color: black;
+        font-weight: bold;
+        border: 5px solid #E63946;
+        margin: 0px auto;
+        width: auto;
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+</style>
 # Need To Knows
 
 <div class=important-boxed>
@@ -406,6 +418,7 @@ az group create --name example-rg --location eastus2
 </b>
 
 </div>
+
 #### Replication Options in a Nutshell
 - LRS and ZRS are SINGLE REGION replication only
     - No replication outside of Azure region
