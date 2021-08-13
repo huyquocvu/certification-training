@@ -117,7 +117,7 @@ GZRS
     - https://\<StorageAccountName> ***-secondary***.blob.core.windows.net
 
 ### Azure Storage Durability and Availability Scenarios
-Will be on exam
+# Will be on exam
 | Outage Scenario | LRS | ZRS | GRS/RA-GRS | GZRS/RA-GZRS |
 | --------------- | --- | --- | ---------- | ------------ |
 | Datacenter node becomes unavailable | Yes | Yes | Yes | Yes |
@@ -135,3 +135,73 @@ Will be on exam
 | FileStorage | File Only | Premium | N/A | LRS, ZRS |
 | BlobStorage | Blob (block blobs and append blobs) | Standard | Hot, Cool, Archive | LRS, GRS, RA-GRS |
 *Referenced from Microsoft at https://bit.ly/azstraccts*
+
+# Configuring Access Control to Storage Accounts
+
+## Data Storage Authorization
+- Anonymous
+    - Azure blobs only
+- Authenticated
+    - Shared Key authorization
+        - App access storage with a storage access key
+    - Shared Access Signatures (SAS)
+        - limited delegated access to resources in storage account
+    - Azure AD
+        - RBAC to storage account
+
+## Authorizing Access to Azure Storage Data
+
+|      | Shared Key<br>(storage account Key) | Shared Access Signature (SAS) | Azure AD | Anonymous public read access |
+| --- | --- | --- | --- | --- |
+| Azure Blobs | Supported | Supported | Supported | Supported |
+| Azure Files (SMB) | Supported | Not Supported | *Supported using Azure AD Domain Services ONLY | Not Supported |
+| Azure Files (REST) | Supported | Supported | Not Supported | Not Supported |
+| Azure Queues | Supported | Supported | Supported | Not Supported |
+| Azure Tables | Supported | Supported | Not Supported | Not Supported |
+*More information at https://bit.ly/2DHOGXa*
+
+## Shared Access Key Authorization
+- Two default keys
+- Access to entire storage account
+    - Basically root password to entire storage account
+- Protect from unauthorized view
+- Keys can be regenerated if compromised
+- MS recommends using Azure AD
+- Store in Azure Key Vault for increased security
+
+## Shared Access Signatures (SAS)
+- User Delegation
+    - Azure AD and permissions
+    - Blob storage only
+- Service
+    - Secured with storage account key
+    - Delegates access to a resource in only one Azure storage services
+        - Blob
+        - Queue
+        - Table
+        - File
+- Account
+    - Secured with storage account key
+    - Delegates accses to one or more storage services
+    - Operations available in User Delegation and Service SAS are available with account SAS
+    - Delegate access to read, write, and delete that are not permitted with service SAS
+## Azure AD Authorization
+- Supported for Blob and Queue storage
+- Uses RBAC
+- MS recommended approach
+
+### Accessing Resources using Azure AD
+- Data layer permissions
+    - Grants access to storage
+    - Does not grant access navigate through resources in Azure
+- Management permissions
+    - Grants access through resources
+
+## Network Access Control
+###Azure Storage Firewalls and Virtual Networks
+- Layered security model
+- Limit access by rules
+    - IP addresses
+    - IP ranges
+    - Subnets in Azure vNets
+- Requires authorization

@@ -1,10 +1,31 @@
+<style>
+    .important-boxed {
+        background: #D9E5D6;
+        color: black;
+        font-weight: bold;
+        border: 5px solid #E63946;
+        margin: 0px auto;
+        width: auto;
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+</style>
 # Need To Knows
 
+<div class=important-boxed>
+This means important. Pay close attention
+</div>
 ## Exam Breakdown {#exam-breakdown}
-Manage Azure identities and governance (15-20%)
+**Manage Azure identities and governance (15-20%)**
 - ### [Manage AD objects](#manage-ad-objects)
 - ### [Manage role-based access control (RBAC)](#manage-rbac)
 - ### [Manage subscriptions and governance](#manage-subscriptions-and-governance)
+
+**Implement and Manage Storage (10-15%)**
+- ### [Manage Storage Accounts](#manage-storage-accounts)
+- ### [Managed Data in Azure Storage](#manage-data-in-azure-storage)
+- ### [Configure Azure files and Azure blob storage](#configure-azure-files-blob-storage)
 ---
 ### Manage AD Objects {#manage-ad-objects}
 - [Create users and groups](#create-users-and-groups)
@@ -305,3 +326,138 @@ az group create --name example-rg --location eastus2
 - Used to efficiently manage access, policies, and compliance
 - Provides a level of scope over subscriptions
 - Subscriptions with a group inherit policies applied to the group
+
+### Manage Storage Accounts {#manage-storage-accounts}
+- Objectives
+    - [Configure network access to storage accounts](#configure-network-access-to-storage-accounts)
+    - [Create and configure storage accounts](#create-and-configure-storage-accounts)
+    - [Generate shared access signature (SAS)](#generate-shared-access-signature)
+    - [Manage access keys](#manage-access-keys)
+    - [Implement Azure storage replication](#implement-azure-storage-replication)
+    - [Configure Azure AD Authentication for a storage account](#configure-azure-ad-auth-for-storage-account)
+
+#### Configure Network Access to Storage Accounts {#configure-networok-access-to-storage-accounts}
+- ##### Azure Storage Firewalls and Virtual Networks
+    - Layered security model
+    - Limit access by rules
+        - IP addresses
+        - IP ranges
+        - Subnets in Azure vNets
+    - Configured through Firewall and Virtual Networks blade
+    - Service Endpoints in vNets
+    - Requires Authorization
+
+#### Create and Configure Storage Accounts {#create-and-configure-storage-accounts}
+- ##### Create Storage Accounts
+    - Contains all Azure storage objects
+    - Accessed through unique namespace
+    - Be familiar with creating storage account in Azure portal and Azure CLI
+- ##### Types of Storage Accounts
+    - General-purpose v2
+        - This will be the go-to for most cases
+    - General-purpose v1
+    - BlockBlobStorage
+    - FileStorage
+    - BlobStorage
+- ##### Access Tiers
+    - Hot
+        - Highest storage cost
+        - Lower access cost
+    - Cool
+        - Lower storage cost
+        - Higher access cost
+        - 30 day minimum
+    - Archive
+        - Lowest storage cost
+        - Highest access cost
+        - 180 day minimum
+
+<div class=important-boxed>
+
+# **Important**
+### Storage Account Supported Capabilities
+|   | Data Objects | Performance Tiers | Access Tiers | Replication Options |
+| - | - | - | - | - |
+| General Purpose v2 | Blob, File, Table, Disk, Queue, & Data Lake Gen2 | Standard<br>Premium (Disk Only) | Hot, Cool. Archive | LRS, GRS, RA-GRS, ZRS, GZRS(preview), RA-GZRS(preview) |
+| General Purpose v1 | Blob, File, Queue, Table, & Disk | Standard<br>Premium (Disk Only) | N/A | LRS, GRS, RA-GRS |
+| BlockBlobStorage | Blob (block blobs and append blobs) | Premium | N/A | LRS, ZRS |
+| FileStorage | File Only | Premium | N/A | LRS, ZRS |
+| BlobStorage | Blob (block blobs and append blobs) | Standard | Hot, Cool, Archive | LRS, GRS, RA-GRS |
+*Referenced from Microsoft at https://bit.ly/azstraccts*
+
+</div>
+
+### Manage Access Keys {#manage-access-keys}
+- Access to entire storage account
+    - Two keys created by default for storage account
+    - Grants access to ENTIRE storage account, not just content
+- Used in scenarios needing limited number of secrets
+- Must be protected at all costs
+- Consider Azure AD instead
+- Use Azure Key Vault
+    - Create managed key infrastructure
+- Familiarize with retrieving and applying keys
+
+### Generate Shared Access Signatures {#generate-shared-access-signature}
+- Provide time-limited access to resources in a storage account
+- Allows granular permissions
+- can be applied at storage account or data object level
+- Generated with multiple tools
+    - Azure Portal
+    - Azure Storage Explorer
+- Familarize with generating and applying SAS keys
+
+### Implement Azure Storage Replication {#implement-azure-storage-replication}
+<div class=important-boxed>
+<b>Know the 6 replication options<br>
+
+| | | |
+| -- | -- | -- |
+| Local-Redundant Storage (LRS) | Zone-Redundant Storage(ZRS) | Geo-Redundant storage (GRS) |
+| Geo-Zone-Redundant Storage (GZRS) | Read-Access Geo-Redundant Storage (RA-GRS) | Read-Access Geo-Zone-Redundant Storage (RA-GZRS) |
+
+</b>
+
+</div>
+#### Replication Options in a Nutshell
+- LRS and ZRS are SINGLE REGION replication only
+    - No replication outside of Azure region
+- ZRS provides replication across three Azure datacenters
+- GRS and GZRS provide cross-region replication
+- RA-GRS and RA-GZRS provide read-only access to replicated data
+- Replication can be re-configured on Storage Account
+
+<div class=important-boxed>
+
+### Azure Storage Durability and Availability Scenarios
+
+| Outage Scenario | LRS | ZRS | GRS/RA-GRS | GZRS/RA-GZRS |
+| --------------- | --- | --- | ---------- | ------------ |
+| Datacenter node becomes unavailable | Yes | Yes | Yes | Yes |
+| Entire datacenter becomes unavailable | No | Yes | Yes | Yes |
+| Primary region-wide outage | No | No | Yes | Yes |
+| Read access in secondary region when primary is unavailable | No | No | Yes (with RA-GRS) | Yes (with RA-GZRS) |
+*Referenced from Microsoft at https://bit.ly/2FeFav5*
+
+</div>
+
+### Configure Azure AD Authentication for a Storage Account {#configure-azure-ad-auth-for-storage-account}
+
+- Supproted for Blob and Queue storage
+- Uses RBAC
+- Understand how permissions are applied
+- Microsoft recommended approach
+    - Use Azure AD whenever possible
+
+<div class=important-boxed>
+
+|      | Shared Key<br>(storage account Key) | Shared Access Signature (SAS) | Azure AD | Anonymous public read access |
+| --- | --- | --- | --- | --- |
+| Azure Blobs | Supported | Supported | Supported | Supported |
+| Azure Files (SMB) | Supported | Not Supported | *Supported using Azure AD Domain Services ONLY | Not Supported |
+| Azure Files (REST) | Supported | Supported | Not Supported | Not Supported |
+| Azure Queues | Supported | Supported | Supported | Not Supported |
+| Azure Tables | Supported | Supported | Not Supported | Not Supported |
+*More information at https://bit.ly/2DHOGXa*
+
+</div>
