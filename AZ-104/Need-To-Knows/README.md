@@ -1,16 +1,4 @@
-<style>
-    .important-boxed {
-        background: #D9E5D6;
-        color: black;
-        font-weight: bold;
-        border: 5px solid #E63946;
-        margin: 0px auto;
-        width: auto;
-        padding: 10px;
-        border-radius: 12px;
-    }
-
-</style>
+?
 # Need To Knows
 
 <div class=important-boxed>
