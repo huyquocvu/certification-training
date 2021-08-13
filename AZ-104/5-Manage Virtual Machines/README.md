@@ -1,4 +1,9 @@
-# Creating a Virtual Machine
+[Creating a Virtual Machine](#1)
+[Configure High Availability and Scalability](#2)
+
+
+
+# Creating a Virtual Machine {#1}
 
 - Still requires maintenance
 - No need to worry about hardware
@@ -70,3 +75,121 @@ Move-AzResource -DesintationSubscriptionId "8bc4fbf0-some-more-char-226j44r4bg93
 When to use:
 - Cannot connect via RDP or SSH
 - Difficulty troubleshooting application access on Azure Vm
+###### PowerShell
+```PowerShell
+Set-AzVM -Redeploy -ResourceGroupname 'ps-course-rg' -Name 'linux-1'
+```
+###### Azure CLI
+```Bash
+az vm redeploy --resource-Group ps-course-rg --name linux-1
+```
+
+# Configuring VMs
+[Configure Networking](#configure-networking)
+[Add Data Disks](#add-data-disks)
+[Configure Azure Disk Encryption](#configure-azure-disk-encryption)
+
+## Configure Networking {#configure-networking}
+<dl>
+    <dt>Required network resources</dt>
+    <dd>Network Interface</dd>
+    <dd>Virtual Network and Subnets</dd>
+    <dd>IP Address</dd>
+</dl>
+
+*Note: deallocating VM releases dynamic public IP to be reassigned*
+
+- When creating an Azure VM, you MUST create a virtual network or use an existing VNet
+- No security boundary between subnets by default
+- To add a NIC to an existing VM, it must first be deallocated
+- NIC can only be assigned to a virtual network that exists in the same location as the NIC
+
+```Bash
+# Azure CLI Basic Public IP
+az network public-ip create -g ps-course-rg -n MyIp
+```
+
+## Attaching Data Disks
+- Can add new or existing data disks
+- Done through portal and CLI
+- Adding managed disks allows you to choose from source types of BLOB or snapshots
+- Disks can be added on the fly
+    - Changes to OS disk requires stopping VM
+
+## Azure Disk Encryption {#configure-azure-disk-encryption}
+- Uses Bitlocker for Windows
+- Uses DMCrypt for Linux
+- Full disk encryption of OS and data disk
+- Integrated with Azure Key Vault
+- VMs must be able to connect to either Azure AD or the KeyVault endpoint
+- Azure KeyVault access policy must be enabled for Azure Disk Encryption
+
+###### PowerShell - Enabling disk encryption 
+```PowerShell
+New-AzKeyVault -Name 'demokv' -ResourceGroupname 'ps-course-rg' `
+    -Location 'southcentralus' -EnabledForDiskEncryption
+
+$KeyVault = Get-AzKeyVault -VaultName 'demokv' -ResourceGroupname 'ps-course-rg'
+
+Set-AzVMDiskEncryptionExtension -ResourceGroupname 'ps-group-rg' -VMName 'linux-1' `
+    -DiskEncryptionVaultUrl $KeyVault.VaultUri `
+    -DiskEncryptionVaultId $KeyVault.ResourceId
+```
+
+# Configure High Availability and Scalability {#2}
+
+## High Availability Constructs
+- [Availability Zones](#availability-zones)
+- [Fault Domains](#fault-domains)
+- [Update Domains](#update-domains)
+- [Availability Sets](#availability-sets)
+- [Scale Sets](#scale-sets)
+
+### Availability Zones {#availability-zones}
+- One or more datacenters deployed across Azure regions
+    - Good for application deployments
+    - 3 zones per region
+- Standard SKU load balancers are availability zone aware
+- Standard SKU PIPs are required
+
+![Availability Zones](https://docs.microsoft.com/en-us/azure/availability-zones/media/az-overview/az-graphic-two.png)
+
+##### SLA agreement
+
+> For all Virtual Machines that have two or more instances deployed across two or more Availability Zones in the same Azure region, we guarantee you will have Virtual Machine Connectivity to at least one instance at least 99.99% of the time.
+
+*Reference: https://azure.microsoft.com/en-us/support/legal/sla/virtual-machines/v1_9/*
+
+### Fault Domains {#fault-domains}
+-  Local group of hardware in an Azure datacenter
+    - Essentially a rack of servers in an Azure datacenter
+- VMs in the same fault domain share common power source and physical network switch
+
+### Update Domains {#update-domains}
+- Individual servers
+- Protects against normal maintenance updates
+    - Applying updates to hardware
+- VMs created in the same update domain will be restarted together during planned maintenance
+- Only one update domain restarted at a time
+
+### Availability Sets {#availability-sets}
+- Groups VMs to distribute across a single datacenter
+    - Minimize disruptions caused by maintenance or outages
+    - Good for VMs
+- Cannot add a VM to availability set post deployment
+    - MUST be configured at creation or time of deployment
+
+![Availability Sets](https://docs.microsoft.com/en-us/azure/virtual-machines/media/virtual-machines-common-manage-availability/ud-fd-configuration.png)
+
+##### SLA agreement
+> For all Virtual Machines that have two or more instances deployed in the same Availability Set or in the same Dedicated Host Group, we guarantee you will have Virtual Machine Connectivity to at least one instance at least 99.95% of the time.
+
+*Reference: https://azure.microsoft.com/en-us/support/legal/sla/virtual-machines/v1_9/*
+
+### Scale Sets {#scale-sets}
+- Group of load balanced VMs
+- Can scale automatically based on demand or schedule
+- 2 or more VMs recommended
+- No additional cost other than extra instances
+- Can be deployed across multiple update/fault domains
+
