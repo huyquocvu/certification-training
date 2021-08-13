@@ -1,7 +1,3 @@
----
-title: "Notes"
-output: "pdf_document"
----
 # Notes
 RBAC
 : Role-Based Access Control
