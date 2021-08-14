@@ -297,3 +297,37 @@ Arm templates can used to update existing resources, as well as creating new res
 ```
 
 ## Deploy from Template
+- Generate a template in the portal
+- Download the template
+- Edit and deploy modified template
+- Find Deploy a Custom Template blade
+- Choose build your own template and upload the file and deploy
+
+## Save a Deployment as an ARM template
+- Locate resource group in Azure portal
+- Choose Export template
+- Download template
+
+###### PowerShell
+```PowerShell
+Export-AzResourceGroup -ResourceGroupName "ps-course-rg" -Path "C:\Downloads" `
+    -Resource /subscriptions/123/resourceGroups/ps-course-rg `
+    /providers/Microsoft.network/networksecuritygroups/web-nsg
+```
+
+## Automate Configuration Management
+
+### Custom Script Extensions
+- Scripts can be located anywhere
+- Scripts can be deployed with ARM templates
+- Script will only run once
+- Removing the extension does not undo what the script did
+- Write scripts that are idempotent
+
+### Configure VHD Template
+- Sysprep managed image with support up to 20 simultaneous deployments
+- Capture image, provide image name
+- Choose to have VM deleted after capture
+    - Once VM is marked as generalized, it cannot be started or modified
+- Provide virtual machine name to confirm the process
+
