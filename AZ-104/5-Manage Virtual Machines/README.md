@@ -1,6 +1,6 @@
 [Creating a Virtual Machine](#1)
 [Configure High Availability and Scalability](#2)
-
+[Automate Deployment and Configuration of Virtual Machines](#3)
 
 
 # Creating a Virtual Machine {#1}
@@ -193,3 +193,107 @@ Set-AzVMDiskEncryptionExtension -ResourceGroupname 'ps-group-rg' -VMName 'linux-
 - No additional cost other than extra instances
 - Can be deployed across multiple update/fault domains
 
+# Automate Deployment and Configuration of Virtual machines {#3}
+
+## ARM Templates
+- JSON format
+- Contains the resources to create in Azure
+- Submit template to the Azure Resource Manager (ARM)
+- Tracked deployments
+
+##### ARM template format
+```JSON
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-20/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "functions": {},
+    "variables": {},
+    "resrouces": [],
+    "outputs": {}
+}
+```
+Required: **schema, contentVersion, resources**
+
+<dl>
+    <dt>Schema</dt>
+    <dd>defines the location of the JSON file that describes the version of the language
+    <dt>contentVersion</dt>
+    <dd>Defines the version of the specific iteration of the file</dd>
+    <dt>Resources</dt>
+    <dd>Define the resources that will be deployed or updated</dd>
+</dl>
+
+Arm templates can used to update existing resources, as well as creating new resources.
+
+##### Example Template
+```JSON
+{
+    "schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "networkSecurityGroups_web_nsg_name": {
+            "defaultValue": "web-nsg",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkSecurityGroups_web_nsg_name')]",
+            "location": "centralus",
+            "tags": {
+                "environment": "production"
+            },
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "Port_443",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('networkSecurityGroups_web_nsg_name'), '/Port_443')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_web_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "443",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        }
+    ]
+
+}
+```
+
+## Deploy from Template
