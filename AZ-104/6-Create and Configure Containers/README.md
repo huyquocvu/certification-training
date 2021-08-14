@@ -246,6 +246,7 @@ spec:
 | **Shared configuration** | Azure Files | Yes | Yes | Yes | Yes |
 | **Structured app data** | Azure Disks | Yes | No | Yes | Yes |
 | **Unstructured data, File system operations** | BlobFuse | Yes | Yes | Yes | No |
+
 >**Takeaway:** understand how storage needs to be accessed
 
 
@@ -282,6 +283,7 @@ kubectl autoscale deployment azure-vote-front --cpu-percent=50 --min=3 --max=10
 | On-prem access using VPN | Works when initiated by pod | Works both ways |
 | Access to resources secured by service endpoints | Supported | Supported |
 | Expose Kubernetes service using a load balancer, App Gateway, or ingress controller | Supported | Supported |
+
 *Reference: https://bit.ly/2QZvpHz*
 
 #### Kubenet
