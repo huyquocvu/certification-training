@@ -9,8 +9,8 @@
         padding: 10px;
         border-radius: 12px;
     }
-
 </style>
+>Disclaimer: This README contains styling that does not work with Github-flavored Markdown.
 # Need To Knows
 
 <div class=important-boxed>
@@ -19,14 +19,23 @@ This means important. Pay close attention as it may be on the exam.
 
 ## Exam Breakdown {#exam-breakdown}
 **Manage Azure identities and governance (15-20%)**
-- ### [Manage AD objects](#manage-ad-objects)
-- ### [Manage role-based access control (RBAC)](#manage-rbac)
-- ### [Manage subscriptions and governance](#manage-subscriptions-and-governance)
+- [Manage AD objects](#manage-ad-objects)
+- [Manage role-based access control (RBAC)](#manage-rbac)
+- [Manage subscriptions and governance](#manage-subscriptions-and-governance)
 
 **Implement and Manage Storage (10-15%)**
-- ### [Manage Storage Accounts](#manage-storage-accounts)
-- ### [Managed Data in Azure Storage](#manage-data-in-azure-storage)
-- ### [Configure Azure files and Azure blob storage](#configure-azure-files-blob-storage)
+- [Manage Storage Accounts](#manage-storage-accounts)
+- [Managed Data in Azure Storage](#manage-data-in-azure-storage)
+- [Configure Azure files and Azure blob storage](#configure-azure-files-blob-storage)
+
+**Deploy and manage Azure compute resources (25-30%)**
+- [Create and configure VMs](#create-configure-VMs)
+- [Configure VMs for high availability and scalability](#configure-vms-for-high-availability)
+- [Automate deployment and configuration of VMs](#automate-deployment-configuration-vms)
+- [Create and configure containers](#create-configure-containers)
+- [Create and configure Web Apps](#create-configure-web-apps)
+
+
 ---
 ### Manage AD Objects {#manage-ad-objects}
 - [Create users and groups](#create-users-and-groups)
@@ -462,3 +471,207 @@ az group create --name example-rg --location eastus2
 
 </div>
 
+### Create and Configure VMs {#create-configure-VMs}
+- [Configure Azure Disk Encryption](#configure-azure-disk-encryption)
+- [Move VMs from one resource group to another](#move-vms)
+- [Manage VM sizes](#manage-vm-sizes)
+- [Add data disks](#add-data-disks)
+- [Configure networking](#configure-networking)
+- [Redeploy VMs](#redeploy-vms)
+
+#### Configure Azure Disk Encryption {#configure-azure-disk-encryption}
+- Full disk encryption of the OS and data disk
+- Azure disk encryption is integrated with Azure Key Vault
+- VMs must be able to connect to either Azure AD or the KeyVault endpoint
+#### Move VMs from One Resource Group to Another {#move-vms}
+- Moving a VM to another subscription requires moving all dependent items
+- VM scale sets with standard load balancers/PIPs cannot be moved
+- VMs integrated with key vault for disk encryption cannot be moved
+```PowerShell
+Move-AzResource -DestinationResourceGroupName 'ps-course-rg' `
+    -ResourceId <myResourceId,myResourceId,myResourceId>
+
+Move-AzResource -DestinationSubscriptionId "some-subscription-id" `
+    -DestinationResourceGroupName 'ps-course-rg' `
+    -ResourceId <myResourceId,myResourceId,myResourceId>
+
+# Moving multiple resources can be done via comma separated list
+```
+>Be familiar with these PowerShell commands
+#### Manage VM Sizes {#manage-vm-sizes}
+VM will reboot after being resized.
+That is all.
+#### Add Data Disks {#add-data-disks}
+- Can add a new or existing data disk
+- Adding managed disks allows you to choose from source types of BLOB or snapshots
+#### Configure Networking {#configure-networking}
+- When creating an Azure VM, you must create a virtual network or use an existing vNet
+- There is no security boundary between subnets by default
+- To add a NIC to an existing VM, it must first be deallocated
+    - Can use PowerShell with '-force' parameter, then add NIC
+- A deallocated VM releases dynamically assigned public IPs
+- A NIC can only be assigned to a virtual network that exists in the same location as the NIC
+#### Redeploy VMs {#redeploy-vms}
+When to use redploy option:
+- Cannot connect via RDP or SSH
+- Redeploy shuts down the VM and moves to new node and powers back up
+
+```powershell
+# PowerShell
+Set-AzVM -Redeploy -ResourceGroupName 'ps-course-rg' -Name "linux-1"
+
+# Azure CLI
+az vm redeploy --resource-group ps-course-rg --name linux-1
+```
+
+### Configure VMs for High Availability and Scalability {#configure-vms-for-high-availability}
+
+- Configure VMs for High Availability
+- Deploy and configure scale sets
+
+#### Configure VMs for High Availability
+Availability Zones
+- Distribute VMs across *Azure regions*
+    - 3 zones per region
+- Standard SKU load balancers are availability zone aware
+- Standard SKU PIPs are required
+
+Fault Domains
+- Logical group of hardware in an Azure datacenter
+- VMs in the same fault domain share common power source and physical network switch
+
+Update Domains
+- Protect against normal maintenance updates
+- VMs created in the same update domain will eb restarted together during planned maintenance
+- Only one update domain restarted at a time
+
+Availability Sets
+- Group VMs to distribute across a single datacenter
+- 5 update domains assigned by default
+    - Can provide up to 20
+- Cannot add a VM to availability set post-deployment
+    - Must be done at creation
+
+Scale Sets
+- Group of load balanced virtual machines
+- Can scale automatically based on demand or schedule
+- 2 or more VMs recommended
+- Can be deployed across multiple update/fault domains
+
+### Automate Deployment and Configuration of VMs {#automate-deployment-configuration-vms}
+Modify ARM template
+- JSON format
+- Used to create or modify resources in Azure
+- Submit template to the Azure Resource Manager (ARM)
+- Can modify existing template in portal
+    - Choose Export template under Automation
+    - Select Deploy to edit template
+    - Make changes and save
+
+Deploy from template
+- Generate template in the protal
+- Download the template
+- Edit and deploy modified template
+
+Save a deployment as an ARM template
+- Locate resource group in the portal
+- Choose Export template
+- Download template
+
+Automate configuration management by using custom script extension
+- Scripts can be located anywhere as long as VM can access it
+- Scripts can be deployed with ARM template
+- Script will only run once
+
+Configure VHD template
+- Sysprep managed impage with supprot up to 20 simultaneous deployments
+- Capture image, provide image name
+- Choose to have VM deleted after capture
+- Provide VM name to confirm the process
+
+### Create and Configure Containers {#create-configure-containers}
+Create and Configure Azure Containers
+- Restart Policies
+    - Always
+    - On failure
+    - Never
+```PowerShell
+# Create a resource group
+az group create --name ps-course-rg --location centralus
+
+# Create and deploy container
+az container create --resource-group ps-course-rg --name mycontainer \
+    --image mcr.microsoft.com/azuredocs/aci-helloworld --dns-name-label az104-demo \
+    --ports 80 --restart-policy Always
+```
+
+Create and Configure Azure Kubernetes Service
+- AKS cluster must use VM scale sets for the nodes for autoscaling and multiple node pools
+- All node pools must reside in the same virtual network
+- **AKS cluster must use the *Standard SKU* load balancer to use multiple node pools**
+```powershell
+# Create a basic single-node AKS cluster
+az aks create \
+    --resource-group ps-course-rg \
+    --name PSAKSCluster \
+    --vm-set-type VirtualMachineScaleSets \
+    --node-count 2 \
+    --generate-ssh-keys \
+    --load-balancer-sku standard
+```
+
+### Create and Configure Web Apps {#create-configure-web-apps}
+Create and configure App Service Plans
+
+<div class=important-boxed>
+
+| Features | Free (F)/Shared (D) | Standard | Premium v2 | Premium v3 |
+| -------- | ----------- | -------- | ---------- | ---------- |
+| Custom Domain | Shared D, B | Yes | Yes | Yes |
+| Scale | B manual (3) | Auto 10 | Auto 20 | Auto 30 |
+| Staging slots | | 5 | 20 | 20 |
+| Daily Backups | | 10 | 50 | 50 |
+| Traffic Manager | | Yes | Yes | Yes |
+
+</div>
+
+```powershell
+# Create resource group
+az group create --name ps-app-rg --location centralus
+
+# Create app service plan
+az appservice plan create --name psasp --resource-group ps-app-rg --sku F1 --is-linux
+
+# Create web app
+az webapp create --name dotnetapp --resource-group ps-app-rg --plan psasp
+```
+
+Create and configure App Service
+- Web app and App Service Plan needs to be in the same region
+- Cannot mix Windows and Linux apps in the same App Service Plan
+- .NET Core is supported on both Windows and Linux
+- Autoscaling is determined by rules based on threshold metrics defined
+
+Good to know:
+```powershell
+# Creating a VM using PowerShell
+# Note the patterns
+# Creating a new resource will start with the "New" verb
+# Retrieving information about a resource will start with the "Get" verb
+
+New-AzResourceGroup -Name 'ps-course-rg' -Location 'CentralUS'
+New-AzVM -ResourceGroupName 'ps-course-rg' -Name 'windows-1'`
+    -Location 'CentralUS' -VirtualNetworkName 'main-vnet'`
+    -SubnetName 'backend' -SecurityGroupName 'myNetworkSecurityGroup'`
+    -PublicIpAddressName 'myPublicIpAddress' -OpenPorts 80,3389
+
+# Using Azure CLI
+az group create --name ps-course-rg --location centralus
+az vm create --resource-Group ps-course-rg --name windows-1 \
+    --image win2016datacenter --admin-username azureuser
+```
+Strategy:
+- Know what product SKUs are required for services
+    - Availability zones
+    - App service plans
+- Be familiar with implementations in portal with code
